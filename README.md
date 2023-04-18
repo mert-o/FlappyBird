@@ -5,8 +5,8 @@
 
 - git clone https://github.com/mert-o/flappybird.git  
 - cd flappym  
-- conda create --name <name> python=3.8.*  
-- conda actiave <name>  
+- conda create --name \<name\> python=3.8.*  
+- conda actiave \<name\>  
 - pip install -r requirements (Requires cmake)  
 - python flappy.py  
 
