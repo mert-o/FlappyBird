@@ -1,7 +1,7 @@
 ## Flappy Bird but not.
 
 
-## Setup (Tested on MacOS and Ubuntu)
+### Setup (Tested on MacOS and Ubuntu)
 
 git clone https://github.com/mert-o/flappym.git  
 cd flappym  
