@@ -4,7 +4,7 @@
 ### Setup (Tested on MacOS and Ubuntu)
 
 - git clone https://github.com/mert-o/flappybird.git  
-- cd flappym  
+- cd flappybird  
 - conda create --name \<name\> python=3.8.*  
 - conda actiave \<name\>  
 - pip install -r requirements (Requires cmake)  
