@@ -24,3 +24,6 @@
 ### Notes:  
 Effects are not working right now, will do it with media pipe.  
 
+### To be added:
+- Laughter detection
+- Multiplayer mode
