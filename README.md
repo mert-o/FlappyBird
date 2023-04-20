@@ -10,6 +10,25 @@
 - pip install -r requirements (Requires cmake)  
 - python flappy.py  
 
+### How it works?  
+- Calibrate the smile:  
+    The game gets into a calibration mode on the start of the game and also not seeing a face for 5 seconds.
+    Each player should calibrate the game as described in the calibration mode.
+    As wanted, calibration mode can be activated from the main menu.
+    
+- Game modes:  
+    -- Pipes: Classic Flappy bird game, try to pass through the gaps between the pipes.  
+    -- Stars: An endless mode that you try to collect small stars and the big stars that add a star sticker to the head of the player.  
+
+- Difficulties:  
+    NOTE: Difficulties are only working in pipes mode.
+    -- Easy to Hard: the gap size gets smaller in harder modes.
+    -- Arcade: the game gets faster and the gap size gets smaller by time.  
+
+- Landmarks: Demonstrates which landmarks on a face the mediapipe library is using by drawing on the player's face.
+
+- FX: Will be used to add special effects to the game. Doesn't work right now.
+    
 
 ### New:  
 - Difficulty levels.  
