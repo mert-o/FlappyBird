@@ -21,8 +21,8 @@
     -- Stars: An endless mode that you try to collect small stars and the big stars that add a star sticker to the head of the player.  
 
 - Difficulties:  
-    NOTE: Difficulties are only working in pipes mode.
-    -- Easy to Hard: the gap size gets smaller in harder modes.
+    NOTE: Difficulties are only working in pipes mode.  
+    -- Easy to Hard: the gap size gets smaller in harder modes.  
     -- Arcade: the game gets faster and the gap size gets smaller by time.  
 
 - Landmarks: Demonstrates which landmarks on a face the mediapipe library is using by drawing on the player's face.
