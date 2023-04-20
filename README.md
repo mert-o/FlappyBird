@@ -12,9 +12,9 @@
 
 ### How it works?  
 - Calibrate the smile:  
-    The game gets into a calibration mode on the start of the game and also not seeing a face for 5 seconds.  
-    Each player should calibrate the game as described in the calibration mode.  
-    As wanted, calibration mode can be activated from the main menu.  
+    -- The game gets into a calibration mode on the start of the game and also not seeing a face for 5 seconds.  
+    -- Each player should calibrate the game as described in the calibration mode.  
+    -- As wanted, calibration mode can be activated from the main menu.  
     
 - Game modes:  
     -- Pipes: Classic Flappy bird game, try to pass through the gaps between the pipes.  
