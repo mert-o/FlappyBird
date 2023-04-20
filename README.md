@@ -20,9 +20,9 @@
     -- Pipes: Classic Flappy bird game, try to pass through the gaps between the pipes.  
     -- Stars: An endless mode that you try to collect small stars and the big stars that add a star sticker to the head of the player.  
 - Inputs:  
-    -- Space: the game is played by "Space" key.
-    -- Smile: the bird jumps if the player smiles. To jump again the player should stop smiling.
-    -- Altitude: the degree of smile of the player determines how high the bird should fly. The more the player smile, the more the bird goes up.  
+    -- Space: the game is played by "Space" key.  
+    -- Smile: the bird jumps if the player smiles. To jump again the player should stop smiling. 
+    -- Altitude: the degree of smile of the player determines how high the bird should fly. The more the player smile, the more the bird goes up.    
 - Difficulties:  
     NOTE: Difficulties are only working in pipes mode.  
     -- Easy to Hard: the gap size gets smaller in harder modes.  
