@@ -49,3 +49,6 @@ Effects are not working right now, will do it with media pipe.
 ### To do:
 - Browser version  
 - Multiplayer mode
+
+### Reference:
+    - The game part of this project is stemmed from: https://github.com/sourabhv/FlapPyBird
