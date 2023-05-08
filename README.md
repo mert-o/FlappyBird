@@ -50,5 +50,5 @@ Effects are not working right now, will do it with media pipe.
 - Browser version  
 - Multiplayer mode
 
-### Reference:
-    - The game part of this project is stemmed from: https://github.com/sourabhv/FlapPyBird
+### Reference:  
+- The game part of this project is stemmed from: https://github.com/sourabhv/FlapPyBird
