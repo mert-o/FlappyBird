@@ -36,6 +36,8 @@
 - Adding new words for balloons:  
     -- Simply go to the words.txt and add new word by "[b]word" if you want the word to appear on blue balloons or "[r]word" if you want the word to appear on red balloons.  
     -- Remember to add words line by line.  
+- Adding new avatars:  
+    -- Go to the sprites/avatars folder and add any image you want that is either ".jpg" or ".png".  
 - Landmarks: Demonstrates which landmarks on a face the mediapipe library is using by drawing on the player's face.
 
 ### Building Standalone Executable (Windows 10):
