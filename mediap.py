@@ -41,7 +41,7 @@ class media:
             self._lastFaceDetected = -1
 
             # lip distance, mouth center y and corner y difference, mouth width, eye height
-            self.weights = [0.35, 0.0, 0.5, 0.15]
+            self.weights = [0.35, 0.0, 0.55, 0.1]
 
     def start(self):
             Thread(target=self.gen, args=()).start()
