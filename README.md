@@ -18,7 +18,7 @@
     -- As wanted, calibration mode can be activated from the main menu.  
 
 - Setting new player:  
-    - You can change the current player by clicking the name of the current player on the right top of the screen.   
+    -- You can change the current player by clicking the name of the current player on the right top of the screen.   
 
 - Game modes:  
     -- Pipes: Classic Flappy bird game, try to pass through the gaps between the pipes.  
