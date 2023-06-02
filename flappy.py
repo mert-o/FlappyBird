@@ -1308,7 +1308,7 @@ def configureSmile():
     playery = int(SCREENHEIGHT*0.5)
     playerIndexGen = cycle([0, 1, 2, 1])
     iterloop = 0
-    baseVelx = -16 * dt
+    baseVelx = -128
     playerVelY    =  0  
     playerAccY = 12
     playerMinAcc = -9
@@ -1378,7 +1378,7 @@ def configureSmile():
         if len(BASES_LIST)<3:
             BASES_LIST.append({'x':BASES_LIST[-1]['x']+IMAGES['base'].get_width(),'y':SCREENHEIGHT*0.1})
         for base in BASES_LIST:
-            base['x'] += baseVelx
+            base['x'] += baseVelx * dt
             SCREEN.blit(IMAGES['base'],(base['x'],int(SCREENHEIGHT-IMAGES['base'].get_height())))
 
 
