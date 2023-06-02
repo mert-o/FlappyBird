@@ -12,43 +12,57 @@
 
 ### How it works?  
 - Calibrate the smile:  
-    -- The game gets into a calibration mode on the start of the game and also not seeing a face for 5 seconds.  
+    -- The game gets into a calibration mode on the start of the game, follow the instructions and also try to control the bird.  
     -- Each player should calibrate the game as described in the calibration mode.  
     -- As wanted, calibration mode can be activated from the main menu.  
     
 - Game modes:  
     -- Pipes: Classic Flappy bird game, try to pass through the gaps between the pipes.  
     -- Stars: An endless mode that you try to collect small stars and the big stars that add a star sticker to the head of the player.  
+    -- Balloons: A bird holds an AK47... ( yes, a bird, not your typical bird)  
+    -- Pipes and Stars: Combination of Pipes and Stars modes :)
 - Inputs:  
     -- Space: the game is played by "Space" key.  
     -- Smile: the bird jumps if the player smiles. To jump again the player should stop smiling.  
-    -- Altitude: the degree of smile of the player determines how high the bird should fly. The more the player smile, the more the bird goes up.    
+    -- Altitude: the degree of smile of the player determines how high the bird should fly. The more the player smile, the more the bird goes up.  
+    **Note**: Altitude mode is not available in Balloons mode.
 - Difficulties:  
-    NOTE: Difficulties are only working in pipes mode.  
     -- Easy to Hard: the gap size gets smaller in harder modes.  
     -- Arcade: the game gets faster and the gap size gets smaller by time.  
-
+    **NOTE**: Difficulties are only working in Pipes/Pipes and Stars modes.  
 - Landmarks: Demonstrates which landmarks on a face the mediapipe library is using by drawing on the player's face.
 
-- FX: Will be used to add special effects to the game. Doesn't work right now.
-    
-
-### New:  
-- Difficulty levels.  
-- Now the game asks for calibration after 5 seconds of not seeing a face.  
-- Two modes are combined; pipes and stars.  
-
-
-### Fix:  
-- Smile is not very eye dependent now.  
-
-
-### Notes:  
-Effects are not working right now, will do it with media pipe.  
-
-### To do:
-- Browser version  
-- Multiplayer mode
+### Building Standalone Executable (Windows 10):
+- I have used Pyinstaller for Windows 10 exe.
+- Install the Pyinstaller: pip install pyinstaller
+- Run ``` pyinstaller flappy.py --add-data assets;assets --add-data scores.json;. --add-data last_player.txt;. --add-data words.txt;. --windowed ```
+- This doesn't include the dependencies for mediapie, so should be added by hand.
+- The above command will create a flappy.spec file. In that file add:
+ ```
+ def get_mediapipe_path():
+    import mediapipe
+    mediapipe_path = mediapipe.__path__[0]
+    return mediapipe_path
+ ``` 
+after the line: 
+ ```
+ block_cipher = None 
+ ``` 
+and add:
+```
+mediapipe_tree = Tree(get_mediapipe_path(), prefix='mediapipe', excludes=["*.pyc"])
+a.datas += mediapipe_tree
+a.binaries = filter(lambda x: 'mediapipe' not in x[0], a.binaries)
+``` 
+after the line:
+```
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+```  
+- Now, run: 
+```
+pyinstaller flappy.spec
+```
 
 ### Reference:  
 - The game part of this project is stemmed from: https://github.com/sourabhv/FlapPyBird
+- Default cartoon avatars are from: https://www.freepik.com/free-vector/set-hand-drawn-people-avatars_1258544.htm#page=3&query=cartoon%20avatars&position=7&from_view=search&track=ais
