@@ -1,14 +1,15 @@
 ## Flappy Bird but not.
 
 
-### Setup (Tested on MacOS and Ubuntu)
+### Setup (Tested on MacOS/Ubuntu/Windows 10)
 
 - git clone https://github.com/mert-o/flappybird.git  
-- cd flappybird  
-- conda create --name \<name\> python=3.8.*  
-- conda actiave \<name\>  
-- pip install -r requirements (Requires cmake)  
-- python flappy.py  
+- cd flappybird 
+- If you have conda: 
+    - conda create --name \<name\> python=3.8.*  
+    - conda actiave \<name\>  
+- pip install -r requirements
+- python flappy.py    
 
 ### How it works?  
 - Calibrate the smile:  
@@ -62,6 +63,8 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 ```
 pyinstaller flappy.spec
 ```
+
+### Let me know via issues if you face any problems.
 
 ### Reference:  
 - The game part of this project is stemmed from: https://github.com/sourabhv/FlapPyBird
