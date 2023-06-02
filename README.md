@@ -19,7 +19,6 @@
 
 - Setting new player:  
     -- You can change the current player by clicking the name of the current player on the right top of the screen.   
-
 - Game modes:  
     -- Pipes: Classic Flappy bird game, try to pass through the gaps between the pipes.  
     -- Stars: An endless mode that you try to collect small stars and the big stars that add a star sticker to the head of the player.  
@@ -34,6 +33,9 @@
     -- Easy to Hard: the gap size gets smaller in harder modes.  
     -- Arcade: the game gets faster and the gap size gets smaller by time.  
     **NOTE**: Difficulties are only working in Pipes/Pipes and Stars modes.  
+- Adding new words for balloons:
+    -- Simply go to the words.txt and add new word by "[b]word" if you want the word to appear on blue balloons or "[r]word" if you want the word to appear on red balloons.  
+    -- Remember to add words line by line.  
 - Landmarks: Demonstrates which landmarks on a face the mediapipe library is using by drawing on the player's face.
 
 ### Building Standalone Executable (Windows 10):
