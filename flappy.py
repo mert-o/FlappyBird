@@ -224,7 +224,7 @@ high_scores = None
 settings = Settings(SCREEN)
 def main():
         # select random player sprites
-    global BASES_LIST,NEW_HIGH_SCORE,high_scores,file_path,input_text,PIPEGAPSIZE,GAME_TYPE
+    global BASES_LIST,NEW_HIGH_SCORE,high_scores,file_path,input_text,PIPEGAPSIZE,GAME_TYPE,nameSet
     randPlayer = random.randint(0, len(PLAYERS_LIST) - 1)
     IMAGES['player'] = (
         pygame.image.load(PLAYERS_LIST[randPlayer][0]).convert_alpha(),
@@ -456,7 +456,7 @@ def mainGame():
     elif GAME_TYPE['balloons']:
         BALLOONW = 120
         BALLOONH = 120
-        BALLOONS = 70
+        BALLOONS = 128
         WATERBALLW = 30
         WATERBALLH = 20
         WATERBALLS = 200
