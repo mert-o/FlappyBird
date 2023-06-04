@@ -1,5 +1,6 @@
 ## Flappy Bird but not.
 
+A flappy bird variant where the player smiles for jumps.
 
 ### Setup (Tested on MacOS/Ubuntu/Windows 10)
 
