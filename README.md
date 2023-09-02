@@ -25,15 +25,16 @@ A flappy bird variant where the player smiles for jumps.
     -- Stars: An endless mode that you try to collect small stars and the big stars that add a star sticker to the head of the player.  
     -- Balloons: A bird holds an AK47... ( yes, a bird, not your typical bird)  
     -- Pipes and Stars: Combination of Pipes and Stars modes :)
+    -- Levels: Play each game mode as described for a minute. Try to finish each all the modes.
 - Inputs:  
     -- Space: the game is played by "Space" key.  
     -- Smile: the bird jumps if the player smiles. To jump again the player should stop smiling.  
     -- Altitude: the degree of smile of the player determines how high the bird should fly. The more the player smile, the more the bird goes up.  
-    **Note**: Altitude mode is not available in Balloons mode.
+    **Note**: Altitude mode is not available in Balloons/Banners mode.
 - Difficulties:  
     -- Easy to Hard: the gap size gets smaller in harder modes.  
     -- Arcade: the game gets faster and the gap size gets smaller by time.  
-    **NOTE**: Difficulties are only working in Pipes/Pipes and Stars modes.  
+    **NOTE**: Difficulties are only working in Pipes, Pipes&Stars and Pipes&Stars&Balloons modes.  
 - Adding new words for balloons:  
     -- Simply go to the words.txt and add new word by "[b]word" if you want the word to appear on blue balloons or "[r]word" if you want the word to appear on red balloons.  
     -- Remember to add words line by line.  
@@ -71,8 +72,6 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 ```
 pyinstaller flappy.spec
 ```
-
-### Let me know via issues if you face any problems.
 
 ### Reference:  
 - The game part of this project is stemmed from: https://github.com/sourabhv/FlapPyBird
