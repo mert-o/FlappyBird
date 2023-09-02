@@ -3,6 +3,8 @@ import glob
 import random
 import math
 import time
+import os
+
 class Balloon:
     def __init__(self, word, color,sw,sh,w,h):
         self.word = word
@@ -37,16 +39,18 @@ class Balloon:
 
         self.basey = random.randint(0, int(self.sh * 0.6))
         self.rect.y = self.basey
-        self.freq = 2.5
+        self.freq = 0.005
         self.angle = 0
         self.hit = False
         self.anim_time = 0
     def update(self, delta, x_speed):
         self.angle += self.freq * delta
-        self.rect.y += self.h * 0.05 * math.sin( self.angle)
+        
+        self.rect.y += self.h * 0.04 * math.sin( self.angle)
 
         if self.rect.y > self.sh:
             self.rect.y = 0
+            
         self.rect.x -= delta * x_speed
 
     def draw(self, screen):
@@ -97,5 +101,60 @@ class WaterBall:
     def hits(self, balloon):
         return self.rect.colliderect(balloon.rect)
         
+    def getx(self):
+        return self.rect.x
+    
+    
+    
+    
+class Banners:
+    def __init__(self,path,sw,sh,w,h,good=False):
+        self.w = w
+        self.h = h
+        self.sw = sw
+        self.sh = sh
+        if good:
+            self.protected = True
+        else:
+            self.protected = False
+        self.good = good
+        self.path, self.name = os.path.split(path)
+
+        if good:
+            self.banner = pygame.transform.scale(pygame.image.load(os.path.join(self.path,'protected',self.name)),(w,h))
+        else:
+             self.banner = pygame.transform.scale(pygame.image.load(os.path.join(self.path,self.name)),(w,h))
+
+        self.rect = self.banner.get_rect()
+        self.rect.x = self.sw + w
+
+        self.basey = random.randint(0, int(self.sh * 0.6))
+        self.rect.y = self.basey
+        self.freq = 0.001
+        self.angle = 0
+        self.hit = False
+        self.anim_time = 0
+    def update(self, delta, x_speed):
+        self.angle += self.freq * delta
+        self.rect.y += self.h * 0.02 * math.sin( self.angle)
+
+        if self.rect.y > self.sh:
+            self.rect.y = 0
+        self.rect.x -= delta * x_speed
+
+    def draw(self, screen):
+        if not self.hit:
+            screen.blit(self.banner, (self.rect.x, self.rect.y))
+        else:
+            if self.protected:
+                self.banner = pygame.transform.scale(pygame.image.load(os.path.join(self.path,self.name)),(self.w,self.h))
+                self.protected = False
+                self.hit = False
+            else:
+                if self.good:
+                    print('good')
+                else:
+                    print('bad')
+
     def getx(self):
         return self.rect.x

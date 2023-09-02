@@ -16,14 +16,24 @@ import datetime
 from game_objects import *
 from settings import Settings
 
-FPS = 30
-SCREENWIDTH  = 1280
-SCREENHEIGHT = 720
 
+
+pygame.init()
+pygame.font.init()
+
+
+FPSCLOCK = pygame.time.Clock()
+SCREEN  = pygame.display.set_mode((0, 0), pygame.NOFRAME)
+SCREENWIDTH, SCREENHEIGHT = pygame.display.Info().current_w, pygame.display.Info().current_h
+pygame.display.set_caption('Flappy Bird')
+
+
+
+FPS = 60
 PIPEGAPSIZE  = 330 
 
 BASEY = SCREENHEIGHT * 0.79
-NOSOUND = False
+NOSOUND = True
 
 
 REF_WIDTH = 1280
@@ -45,7 +55,7 @@ BIG_STAR = False
 START = True
 GAME_MODES = {"space":True,"smile":False,"altitude":False}
 GAME_DIFFICULTY = {"easy":True,"medium":False,"hard":False,"arcade":False}
-GAME_TYPE = {'pipes':True,'stars': False,'balloons':False,'pisa':False}
+GAME_TYPE = {'pipes':True,'stars': False,'balloons':False,'pisa':False,'banners':False,'pisabal':False,'levels':False}
 NEW_HIGH_SCORE = False
 
 gm = "space"
@@ -98,14 +108,6 @@ PIPES_LIST = (
     'assets/sprites/pipe-green.png',
     'assets/sprites/pipe-red.png',
 )
-
-pygame.init()
-pygame.font.init()
-font = pygame.font.Font("assets/game_font.ttf", 42)
-font2 = pygame.font.Font("assets/game_font.ttf", 26)
-FPSCLOCK = pygame.time.Clock()
-SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
-pygame.display.set_caption('Flappy Bird')
 
 # numbers sprites for score display
 IMAGES['numbers'] = (
@@ -169,10 +171,13 @@ _star_big = pygame.image.load('assets/sprites/star.png').convert_alpha()
 _star = pygame.transform.scale(_star_big,(_star_big.get_width()/2,_star_big.get_height()/2))
 IMAGES['star'] = _star
 IMAGES['star_big'] = _star_big
+big_star_w = _star_big.get_width()
+big_star_h = _star_big.get_height()
 
 HITMASKS['star'] = _star.get_rect()
 HITMASKS['star_big'] = _star_big.get_rect()
-
+star_w = _star.get_width()
+star_h = _star.get_height()
 # sounds
 if 'win' in sys.platform:
     soundExt = '.wav'
@@ -188,10 +193,10 @@ SOUNDS['wing']   = pygame.mixer.Sound('assets/audio/wing' + soundExt)
 
 wing = pygame.mixer.Channel(6)
 
-messagex = int((SCREENWIDTH - IMAGES['message'].get_width()) / 2)
+messagex = int((SCREENWIDTH - IMAGES['message'].get_width()) / 2.3)
 messagey = int(SCREENHEIGHT * 0.12)
-messagex2 = int((SCREENWIDTH - IMAGES['message2'].get_width()) / 2)
-messagey2 = int(SCREENHEIGHT * 0.8)
+messagex2 = int(SCREENWIDTH/2 - IMAGES['message2'].get_width() / 1.3)
+messagey2 = int(SCREENHEIGHT * 0.8 - IMAGES['message2'].get_height()-20) 
 
 calibrate_img = pygame.image.load('assets/sprites/calibrate_white.png')
 calibrate_img = pygame.transform.scale(calibrate_img,(calibrate_img.get_width()*0.7,calibrate_img.get_height()*0.7))
@@ -204,13 +209,18 @@ calibrate_rect.y = calib_pos[1]
 settings_img = pygame.image.load('assets/sprites/settings.png')
 settings_img = pygame.transform.scale(settings_img,(settings_img.get_width()*0.7,settings_img.get_height()*0.7))
 settings_rect = settings_img.get_rect()
-settings_pos = (SCREENWIDTH/2 - settings_img.get_width()/2,SCREENHEIGHT/2 + calibrate_img.get_height() + 30)
+settings_pos = ((SCREENWIDTH - settings_img.get_width())/2,SCREENHEIGHT/2 + calibrate_img.get_height() + 30)
 settings_rect.x = settings_pos[0]
 settings_rect.y = settings_pos[1]
 
 
+font = pygame.font.Font("assets/game_font.ttf", int(42*size_scale) )
+font2 = pygame.font.Font("assets/game_font.ttf", int(26*size_scale) )
 
-avatars = sorted(glob.glob('./assets/avatars/*.jpg')) + sorted(glob.glob('./assets/avatars/*.png'))
+pth1 = os.path.normpath( './assets/avatars/*.jpg' )
+pth2 = os.path.normpath( './assets/avatars/*.png' )
+avatars = sorted(glob.glob(pth1)) + sorted(glob.glob(pth2))
+
 current_avatar = 0
 next_avatar = font2.render('Next',True,(30,30,30))
 prev_avatar = font2.render('Prev',True,(30,30,30))
@@ -222,9 +232,10 @@ landmark = media(video_capture).start()
 facemask = None#facemasks(video_capture).start()
 high_scores = None
 settings = Settings(SCREEN)
+
 def main():
         # select random player sprites
-    global BASES_LIST,NEW_HIGH_SCORE,high_scores,file_path,input_text,PIPEGAPSIZE,GAME_TYPE,nameSet
+    global BASES_LIST,NEW_HIGH_SCORE,high_scores,file_path,input_text,PIPEGAPSIZE,GAME_TYPE, nameSet
     randPlayer = random.randint(0, len(PLAYERS_LIST) - 1)
     IMAGES['player'] = (
         pygame.image.load(PLAYERS_LIST[randPlayer][0]).convert_alpha(),
@@ -262,7 +273,7 @@ def main():
     BASES_LIST = [{'x':0,'y':SCREENHEIGHT*0.1},
               {'x':IMAGES['base'].get_width(),'y':SCREENHEIGHT  * 0.1}]
     
-    
+    LEVELS = False
     while True:
 
         if not landmark.configured:
@@ -271,12 +282,16 @@ def main():
         if last_player: 
             nameSet = True
             input_text = last_player
+
+            last_avatar = os.path.normpath(last_avatar)
+
             current_avatar = avatars.index(last_avatar)
+
         if not nameSet:
             setName()
         high_scores = read_high_scores(file_path)
         showWelcomeAnimation()
-        if GAME_TYPE['balloons']:
+        if GAME_TYPE['balloons'] or GAME_TYPE['banners'] or GAME_TYPE['pisabal']:
             IMAGES['player'] = (
                 pygame.image.load('assets/sprites/Ak_upflap.png').convert_alpha(),
                 pygame.image.load('assets/sprites/Ak_midflap.png').convert_alpha(),
@@ -289,10 +304,46 @@ def main():
                 pygame.image.load(PLAYERS_LIST[randPlayer][1]).convert_alpha(),
                 pygame.image.load(PLAYERS_LIST[randPlayer][2]).convert_alpha(),
             )
+        if GAME_TYPE['levels']:
+            LEVELS = True
 
-        info = mainGame()
-        if (GAME_TYPE['pipes'] or GAME_TYPE['pisa']) and info is not None :
-            showGameOverScreen(info)
+            if  next_level('pipes'):
+                update_dict(GAME_MODES,'smile')
+                update_dict(GAME_DIFFICULTY,'easy')
+                update_dict(GAME_TYPE,'pipes')
+                info = mainGame(levels=True)
+            else: info = None
+
+            if info is not None:
+                if info['levels']:
+                    if next_level('stars') :
+                        update_dict(GAME_TYPE,'stars')
+                        info = mainGame(score = info['score'],levels=True)
+                    else: info = None
+            if info is not None:
+                if info['levels']:
+                    if next_level('balloons'):
+                        update_dict(GAME_TYPE,'balloons')
+                        info = mainGame(score = info['score'],levels=True)
+                    else: info = None
+            if info is not None:
+                if info['levels']:
+                    if next_level('pisabal'):
+                        update_dict(GAME_TYPE,'pisabal')
+                        info = mainGame(score = info['score'],levels=True)
+                        
+                    else: info = None
+            if info is not None:
+                if info['levels']:
+                    if next_level('finished'):
+                        info = None
+                    else: info = None
+            update_dict(GAME_TYPE,'levels')
+        else:
+            LEVELS = False
+            info = mainGame()
+        if (GAME_TYPE['pipes'] or GAME_TYPE['pisa'] or GAME_TYPE['pisabal']) and info is not None :
+            showGameOverScreen(info, LEVELS)
 
 def showWelcomeAnimation():
     global START,PIPEGAPSIZE,GAME_TYPE,GAME_DIFFICULTY,gm,gt,gd,GAME_MODES,LANDMARKS,FX,current_avatar,calibrate_rect,settings_rect
@@ -304,7 +355,7 @@ def showWelcomeAnimation():
     # iterator used to change playerIndex after every 5th iteration
     iterloop = 0
 
-    playerx = int(SCREENWIDTH/2 - 75)
+    playerx = int(SCREENWIDTH/2 - 120)
     playery = int(SCREENHEIGHT* 0.1)
     
     ossilate_player = 0
@@ -312,11 +363,16 @@ def showWelcomeAnimation():
     temp = True
     
     
-    while temp: 
+    while temp:
+        
+        dt = FPSCLOCK.tick(FPS)
+        
         last_player, last_avatar = get_last_player()
         if last_player:
+
             input_text = last_player
             current_avatar = avatars.index(last_avatar)
+
         avatar_image = pygame.image.load(avatars[current_avatar])
         avatar_image = pygame.transform.scale(avatar_image,(64,64))
         text_surface = font2.render(input_text,True,(0,255,0))
@@ -361,11 +417,11 @@ def showWelcomeAnimation():
 
         #ossilate player position y in welcome screen between -8 +8
         if ossilate_player < 8 and ossilation_up: 
-            ossilate_player +=1
+            ossilate_player += 0.05 * dt
         elif ossilate_player >= 8: ossilation_up = False
 
         if ossilate_player >-8 and not ossilation_up:
-            ossilate_player -=1
+            ossilate_player -= 0.05 * dt
         elif ossilate_player <= -8:
             ossilation_up = True
 
@@ -374,7 +430,6 @@ def showWelcomeAnimation():
             for k,v in GAME_TYPE.items():
                 if v:
                     gt = k
-            
             for k,v in GAME_MODES.items():
                 if v:
                     gm = k
@@ -398,7 +453,7 @@ def showWelcomeAnimation():
 
 
         SCREEN.blit(IMAGES['base'],(0,int(SCREENHEIGHT-IMAGES['base'].get_height())))
-        
+
         if GAME_DIFFICULTY['easy']:
             PIPEGAPSIZE = 330
         elif GAME_DIFFICULTY['medium']:
@@ -409,33 +464,31 @@ def showWelcomeAnimation():
             PIPEGAPSIZE = 330
 
         if iterloop %5 == 0:
-         playerIndex = next(playerIndexGen)
+            playerIndex = next(playerIndexGen)
         iterloop = (iterloop + 1) % 30
         pygame.display.update()
-        FPSCLOCK.tick(FPS)
+        
 
-def mainGame():
-    global LANDMARKS,GAME_MODES,HOPPED,min_smile,max_smile,mins_l,maxs_l,BIG_STAR,high_scores,BASES_LIST,GAME_DIFFICULTY,PIPEGAPSIZE,gt,gm,gd
+def mainGame(score=0,levels=False):
+    global LANDMARKS,GAME_MODES,HOPPED,min_smile,max_smile,mins_l,maxs_l,BIG_STAR,high_scores,BASES_LIST,GAME_DIFFICULTY,PIPEGAPSIZE,gt,gm,gd,star_w
     landmark.num_stars = 0
 
-    score = 0
+    score = score
     playerIndex = 0
     playerIndexGen = cycle([0, 1, 2, 1])
     iterloop = 0
-    if not GAME_TYPE['balloons']:
+    
+    if not GAME_TYPE['balloons'] and not GAME_TYPE['banners']:
         playerx, playery = int(SCREENWIDTH * 0.2), int(SCREENHEIGHT * 0.5) 
     else:
         playerx, playery = int(SCREENWIDTH * 0.1), int(SCREENHEIGHT * 0.5) 
 
-    
     proccessed_scores = []
 
     # get 2 new pipes to add to upperPipes lowerPipes list
     if GAME_TYPE['pipes']:
         newPipe1 = getRandomPipe()
         newPipe2 = getRandomPipe()
-        newPipe3 = getRandomPipe()
-        newPipe4 = getRandomPipe()
         # list of upper pipes
         upperPipes = [
             {'x': int(SCREENWIDTH/2), 'y': newPipe1[0]['y'],"score":False},
@@ -456,11 +509,8 @@ def mainGame():
     elif GAME_TYPE['balloons']:
         BALLOONW = 120
         BALLOONH = 120
-        BALLOONS = 128
         WATERBALLW = 30
         WATERBALLH = 20
-        WATERBALLS = 200
-        birdy_speed = 150
         WB = False
         words = []
         with open('words.txt','r') as f:
@@ -479,6 +529,26 @@ def mainGame():
         water_balls = []
         score_streak = 0
         water_balls_count = 1
+    
+    elif GAME_TYPE['banners']:
+        BANNERW = 150
+        BANNERH = 150
+        
+        WATERBALLW = 30
+        WATERBALLH = 20
+
+        WB = False
+        b_paths = glob.glob('./assets/banners/*.png')
+        b = random.choice(b_paths)
+        good = False
+        if 'good' in b.split('/')[-1].split('.')[0]:
+            good = True
+        
+        banners = [Banners(b,SCREENWIDTH,SCREENHEIGHT,BANNERW,BANNERH,good)]
+        water_balls = []
+        score_streak = 0
+        water_balls_count = 1
+        
     elif GAME_TYPE['pisa']:
         stars = [getNewStar(),getNewStar()]
         stars[0]['x'] = int(SCREENWIDTH*0.5)
@@ -486,8 +556,6 @@ def mainGame():
 
         newPipe1 = getRandomPipe()
         newPipe2 = getRandomPipe()
-        newPipe3 = getRandomPipe()
-        newPipe4 = getRandomPipe()
         # list of upper pipes
         upperPipes = [
             {'x': int(SCREENWIDTH/2), 'y': newPipe1[0]['y'],"score":False},
@@ -502,31 +570,97 @@ def mainGame():
             
         ]
     
-    
-    dt = FPSCLOCK.tick(FPS)/1000
-    pipeVelXBase = -128
-    starVelXBase = -128
+    elif GAME_TYPE['pisabal']:
+        
+        BALLOONW = 120
+        BALLOONH = 120
+        WATERBALLW = 30
+        WATERBALLH = 20
+        
+        WB = False
+        words = []
+        with open('words.txt','r') as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.strip()
+                color = line[1]
+                word = line[3:]
+                words.append([color,word])
+                print(word,color)
+        
+        index = random.randint(0,len(words)-1)
+        print(index)
+        print(words[index][1],words[index][0])
+        balloons = [Balloon(words[index][1],words[index][0],SCREENWIDTH,SCREENHEIGHT,BALLOONW,BALLOONH)]
+        water_balls = []
+        score_streak = 0
+        water_balls_count = 1
+        
+        
+        stars = [getNewStar(),getNewStar()]
+        stars[0]['x'] = int(SCREENWIDTH*0.5)
+        stars[1]['x'] = int(SCREENWIDTH*0.8)
 
-    baseVelx = -128
-    playerVelY    =  0 
-    playerAccY = 12
-    playerMinAcc = -9
+        newPipe1 = getRandomPipe()
+        newPipe2 = getRandomPipe()
+        # list of upper pipes
+        upperPipes = [
+            {'x': int(SCREENWIDTH/2), 'y': newPipe1[0]['y'],"score":False},
+            {'x': int(SCREENWIDTH - IMAGES['pipe'][0].get_width()), 'y': newPipe2[0]['y'],"score":False},
+        ]
+
+        # list of lowerpipe
+        lowerPipes = [
+            
+            {'x': int(SCREENWIDTH/2), 'y': newPipe1[1]['y'],"score":False},
+            {'x': int(SCREENWIDTH - IMAGES['pipe'][0].get_width()), 'y': newPipe2[1]['y'],"score":False},
+            
+        ]
+        
+    
+    
+    pipeVelXBase = -0.25 #128
+    starVelXBase = -0.25 #128
+
+    #speeds
+    
+    BALLOONS = 0.25 #70
+    BANNERS = 0.25 #70 
+    WATERBALLS = 0.45 #200 
+    birdy_speed = 0.2 #150
+    baseVelx = -0.25 #128
+    
+    
+    ballon_spawn_time = 3
+    playerVelY = 0 
+    playerAccY = 0.5
+    playerMinAcc = -1
     maxAngle = 40
     minAngle = -15
-    descentSpeed = 0.85
-    max_acc = 16
-    min_acc = 9
-    max_acc_a = 12
-    min_acc_a = 1
+    descentSpeed = 0.05
+    max_acc = 0.5
+    min_acc = 0.01
+    max_acc_a = 0.5
+    min_acc_a = 0.01
     spaceConst = 1
     smileConst = 1
     altitudeConst = 1
+    
     temp = True
     start_time = time.time()
+    levels_start_time = time.time()
     
+    
+    player_width = IMAGES['player'][0].get_width()
+    player_height = IMAGES['player'][0].get_height()
+    base_width =  IMAGES['base'].get_width()
+    base_height = IMAGES['base'].get_height()
+    pipe_width = IMAGES['pipe'][0].get_width()
+
     while temp:
 
-            
+        dt = FPSCLOCK.tick(FPS)
+        
         if LANDMARKS:
             setBG(landmark.frame)
         elif FX:
@@ -544,95 +678,98 @@ def mainGame():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 temp = False
             if event.type == KEYDOWN:
-                
-                if event.key == K_SPACE and GAME_MODES["space"]:
-                    if GAME_TYPE['balloons']:
+                if event.key == K_SPACE and (GAME_MODES["space"] or (levels and GAME_TYPE['pisabal'])):
+                    if GAME_TYPE['balloons'] or GAME_TYPE['banners']:
                         for i in range(water_balls_count):
-                            water_balls.append(WaterBall(playerx+IMAGES['player'][0].get_width() + 5 + i*WATERBALLW,playery + 15,WATERBALLW,WATERBALLH,WATERBALLS))
-
+                            water_balls.append(WaterBall(playerx+ player_width+ 5 + i*WATERBALLW,playery + 15,WATERBALLW,WATERBALLH,WATERBALLS))
                     else:
-                        if playery > 3 * IMAGES['player'][0].get_height():
-                            playerVelY = playerAccY * spaceConst
+                        if playery > 3 * player_width:
+                            playerVelY = playerAccY 
                             if not NOSOUND: SOUNDS['wing'].play()
-                elif event.key == K_UP and GAME_TYPE['balloons']:
+                elif event.key == K_UP and (GAME_TYPE['balloons'] or GAME_TYPE['banners']):
                     playery -= birdy_speed * dt
-                elif event.key == K_DOWN and GAME_TYPE['balloons']:
+                elif event.key == K_DOWN and (GAME_TYPE['balloons'] or GAME_TYPE['banners']):
                     playery += birdy_speed * dt
         
-        if GAME_TYPE['balloons']:
+        if GAME_TYPE['balloons'] or GAME_TYPE['banners']:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_UP]:
                 playery -= birdy_speed* dt
             elif keys[pygame.K_DOWN]:
                 playery += birdy_speed  * dt
-            """ if not HOPPED:
-                if landmark.smile_level > -1 * (min_smile*1.2)//1 * -1:
-                    mag = (landmark.smile_level - min_smile) * (max_acc - min_acc) / (max_smile - min_smile)  + min_acc
-                    if mag > max_acc or landmark.smile_level>=max_smile*0.75 : mag = max_acc
-                    if mag < min_acc: mag = min_acc
-                    playerVelY = mag * smileConst
-                    if not NOSOUND: SOUNDS['wing'].play()
-                    HOPPED = True """
+                
         elif landmark.smile_level<=-1*(min_smile*1.2)//1*-1 and HOPPED:
             HOPPED = False
-        if GAME_MODES["smile"]:
-            descentSpeed = 0.65
-            if GAME_TYPE['balloons']:
+        
+        if GAME_MODES["smile"] or GAME_TYPE['pisabal']:
+            
+            if GAME_TYPE['balloons'] or GAME_TYPE['banners'] or GAME_TYPE['pisabal']:
                 if not WB and  landmark.smile_level > -1 * (min_smile*1.2)//1 * -1:
                     mag = (landmark.smile_level - min_smile) * (max_acc - min_acc) / (max_smile - min_smile)  + min_acc
-                    if mag > max_acc or landmark.smile_level>=max_smile*0.75 :
+                    if mag > max_acc or landmark.smile_level>=max_smile*0.8 :
                         for i in range(water_balls_count):
-                            water_balls.append(WaterBall(playerx+IMAGES['player'][0].get_width() + 5+ i * WATERBALLW,playery +15,WATERBALLW,WATERBALLH,WATERBALLS))
+                            water_balls.append(WaterBall(playerx+player_width + 5+ i * WATERBALLW,playery +15,WATERBALLW,WATERBALLH,WATERBALLS))
                         WB = True
                 elif landmark.smile_level<=-1*(min_smile*1.2)//1*-1 and WB:
                     WB = False
             else:
+                descentSpeed = 0.03
                 if not HOPPED:
                     if landmark.smile_level > -1 * (min_smile*1.2)//1 * -1:
                         mag = (landmark.smile_level - min_smile) * (max_acc - min_acc) / (max_smile - min_smile)  + min_acc
-                        if mag > max_acc or landmark.smile_level>=max_smile*0.75 : mag = max_acc
+                        if mag > max_acc or landmark.smile_level>=max_smile*0.8 : mag = max_acc
                         if mag < min_acc: mag = min_acc
+                        
                         playerVelY = mag * smileConst
                         if not NOSOUND: SOUNDS['wing'].play()
                         HOPPED = True
                 elif landmark.smile_level<=-1*(min_smile*1.2)//1*-1 and HOPPED:
                     HOPPED = False
-
-        if GAME_MODES["altitude"]:
+                    
+        elif GAME_MODES["altitude"]:
             if landmark.smile_level> -1*(min_smile*1)//1*-1:
                 mag = (landmark.smile_level - min_smile) * (max_acc_a - min_acc_a) / (max_smile - min_smile)  + min_acc_a
                 playerVelY = mag * altitudeConst
                 if not wing.get_busy():
                     if not NOSOUND: wing.play(SOUNDS['wing'])
 
-        # player's movement
 
-        if not GAME_TYPE['balloons']:
+        if not GAME_TYPE['balloons'] and not GAME_TYPE['banners']:
+            
             if playerVelY >= 0:
                 if playery > IMAGES['player'][playerIndex].get_height()/2:
-                    playery -= playerVelY
+                    
+                    playery -= playerVelY * dt
                 else: playerVelY = 0
             if playerVelY<0:
-                if playery < SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][playerIndex].get_height():
-                    playery -= playerVelY
-            if playerVelY > -9:
+                
+                if playery < SCREENHEIGHT - base_height  - player_height:
+                    playery -= playerVelY * dt
+
+            if playerVelY > playerMinAcc:
                 playerVelY -= descentSpeed
             
             rotation = (playerVelY - playerMinAcc) * (maxAngle - minAngle) / (playerAccY -playerMinAcc)  +minAngle
-            playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], rotation)
-            
+            try:
+                playerSurface = pygame.transform.rotate(IMAGES['player'][playerIndex], rotation)
+            except:
+                print(rotation)
+                assert False
         else:
             if playery < 5: playery = 5
-            elif playery > SCREENHEIGHT-IMAGES['base'].get_height()-IMAGES['player'][playerIndex].get_height():
-                playery = SCREENHEIGHT-IMAGES['base'].get_height()-IMAGES['player'][playerIndex].get_height()
+            elif playery > SCREENHEIGHT-base_height- player_height:
+                playery = SCREENHEIGHT-base_height- player_height
             playerSurface = IMAGES['player'][playerIndex]
 
 
+        
         SCREEN.blit(playerSurface, (playerx, playery))
         
         if GAME_TYPE['stars']:
             playerMidPos = (playerx + IMAGES['player'][playerIndex].get_width() / 2,playery +IMAGES['player'][playerIndex].get_height() / 2)
+            
             col = checkCollision(stars,playerMidPos)
+            
             if col != -100:
                 if col <0:
                     landmark.num_stars += 1
@@ -662,7 +799,7 @@ def mainGame():
                 stars.append(getBigStar())
                 BIG_STAR = False
             # remove first pipe if its out of the screen
-            if len(stars) > 0 and stars[0]['x'] < -IMAGES['star'].get_width():
+            if len(stars) > 0 and stars[0]['x'] < -star_w:
                 stars.pop(0)
 
         elif GAME_TYPE['pipes']:
@@ -672,11 +809,12 @@ def mainGame():
                     'score':score,
                     'y': playery,
                     'up': upperPipes,
-                    'lp': lowerPipes
+                    'lp': lowerPipes,
+                    'levels':False
                 }
             else:
                 for i in range(len(upperPipes)):
-                    if playerMidPos[0] >= upperPipes[i]['x'] + IMAGES['pipe'][0].get_width()//2 and not upperPipes[i]['score']:
+                    if playerMidPos[0] >= upperPipes[i]['x'] + pipe_width//2 and not upperPipes[i]['score']:
                         score += 1
                         upperPipes[i]['score'] = True
                         if not NOSOUND: SOUNDS['point'].play()
@@ -692,25 +830,27 @@ def mainGame():
                     lowerPipes.append(newPipe[1])
                     
 
-                if len(upperPipes)>0 and upperPipes[0]['x'] < - IMAGES['pipe'][0].get_width():
+                if len(upperPipes)>0 and upperPipes[0]['x'] < - pipe_width:
                     upperPipes.pop(0)
                     lowerPipes.pop(0)
 
             if GAME_DIFFICULTY["arcade"] and time.time() - start_time > 3:
-                pipeVelXBase  -= 5
-                pipeVelX = pipeVelXBase * dt
-                if PIPEGAPSIZE > IMAGES['player'][0].get_height() * 2.5:
-                    PIPEGAPSIZE -= 4
-                descentSpeed += 0.06
+                pipeVelXBase  -= 0.01
+
+                if PIPEGAPSIZE > player_width * 2.5:
+                    PIPEGAPSIZE -= 1
+                descentSpeed += 0.0005
+                playerAccY += 0.0005
                 #if spaceConst 
                 spaceConst += 0.01
                 smileConst += 0.01
                 altitudeConst += 0.01
                 start_time = time.time()
+        
         elif GAME_TYPE['balloons']:
-            
-            if balloons[0].getx() + balloons[0].w < 0:
-                balloons.pop(0)
+            if balloons:
+                if balloons[0].getx() + balloons[0].w < 0:
+                    balloons.pop(0)
             for b in balloons:
                 b.update(dt, BALLOONS)
                 b.draw(SCREEN)
@@ -725,7 +865,7 @@ def mainGame():
                         if not b.hit and wb.hits(b): 
                             b.hit = True
                             wb.hit = True
-                            if b.color =='r':
+                            if b.color =='b':
                                 if score >0:
                                     score -=1
                                     score_streak = 0
@@ -735,15 +875,51 @@ def mainGame():
                                 score_streak += 1
                                 if score_streak %5 == 0:
                                     water_balls_count += 1
-                                    
-
-            
             if water_balls and water_balls[-1].getx()>SCREENWIDTH:
                 water_balls.pop(-1)
 
             if time.time() - start_time> 3:
                 index = random.randint(0,len(words)-1)
                 balloons.append(Balloon(words[index][1],words[index][0],SCREENWIDTH,SCREENHEIGHT,BALLOONW,BALLOONH))
+                start_time = time.time()
+                
+        elif GAME_TYPE['banners']:
+            
+            if banners[0].getx() + banners[0].w < 0:
+                banners.pop(0)
+            for b in banners:
+                b.update(dt,BANNERS )
+                b.draw(SCREEN)
+
+            for wb in water_balls:
+
+                wb.update(dt)
+                wb.draw(SCREEN)
+
+                if not wb.hit:
+                    for b in banners:
+                        if not b.hit and wb.hits(b): 
+                            b.hit = True
+                            wb.hit = True
+                            if b.good:
+                                if score >0 and not b.protected:
+                                    score -=1
+                                    score_streak = 0
+                                    water_balls_count = 1
+                            else:
+                                score += 1
+                                score_streak += 1
+                                if score_streak %5 == 0:
+                                    water_balls_count += 1
+            if water_balls and water_balls[-1].getx()>SCREENWIDTH:
+                water_balls.pop(-1)
+
+            if time.time() - start_time> 3:
+                b = random.choice(b_paths)
+                good = False
+                if 'good' in b.split('/')[-1].split('.')[0]:
+                    good = True
+                banners.append(Banners(b,SCREENWIDTH,SCREENHEIGHT,BANNERW,BANNERH,good))
                 start_time = time.time()
         
         elif GAME_TYPE['pisa']:
@@ -786,7 +962,8 @@ def mainGame():
                     'score':score,
                     'y': playery,
                     'up': upperPipes,
-                    'lp': lowerPipes
+                    'lp': lowerPipes,
+                    'levels':False
                 }
             else:
                 for i in range(len(upperPipes)):
@@ -801,55 +978,179 @@ def mainGame():
                     upperPipes.append(newPipe[0])
                     lowerPipes.append(newPipe[1])
 
-                if len(upperPipes)>0 and upperPipes[0]['x'] < - IMAGES['pipe'][0].get_width():
+                if len(upperPipes)>0 and upperPipes[0]['x'] < - pipe_width:
                     upperPipes.pop(0)
                     lowerPipes.pop(0)
 
             if GAME_DIFFICULTY["arcade"] and time.time() - start_time > 3:
-                pipeVelXBase  -= 5
-                starVelXBase -= 5
-                pipeVelX = pipeVelXBase * dt
-                starVelX = starVelXBase * dt
-                if PIPEGAPSIZE > IMAGES['player'][0].get_height() * 2.5:
-                    PIPEGAPSIZE -= 4
-                descentSpeed += 0.06
+                pipeVelXBase  -= 0.01
+
+                if PIPEGAPSIZE > player_width * 2.5:
+                    PIPEGAPSIZE -= 1
+                descentSpeed += 0.0005
+                playerAccY += 0.0005
+                
                 #if spaceConst 
                 spaceConst += 0.01
                 smileConst += 0.01
                 altitudeConst += 0.01
                 start_time = time.time()
+                
+        elif GAME_TYPE['pisabal']:
+            
+            
+            playerMidPos = (playerx + IMAGES['player'][playerIndex].get_width() / 2,playery +IMAGES['player'][playerIndex].get_height() / 2)
+            col = checkCollision(stars,playerMidPos)
+            if col != -100:
+                if col <0:
+                    landmark.num_stars += 1
+                    stars.pop((-1*(col+1)))
+                    score += 8
+                else:
+                    stars.pop(col)
+                    score +=1
+                if (score+1) % 15 == 0:
+                    if score not in proccessed_scores:
+                        proccessed_scores.append(score)
+                        BIG_STAR = True
+                if not NOSOUND: SOUNDS['point'].play() 
+                
+            # move star to left
+            for star in stars:
+                star['x'] += starVelXBase * dt
+                if star['b']:
+                    SCREEN.blit(IMAGES['star_big'],(star['x'],star['y']))
+                else:
+                    SCREEN.blit(IMAGES['star'],(star['x'],star['y']))
 
+            if stars[-1]['x'] <= SCREENWIDTH*0.6 and not BIG_STAR:
+                stars.append(getNewStar())
+
+            if BIG_STAR:
+                stars.append(getBigStar())
+                BIG_STAR = False
+            # remove first pipe if its out of the screen
+            if len(stars) > 0 and stars[0]['x'] < -IMAGES['star'].get_width():
+                stars.pop(0)
+
+            if checkCrash(playerMidPos,upperPipes,lowerPipes):
+                return{
+                    'score':score,
+                    'y': playery,
+                    'up': upperPipes,
+                    'lp': lowerPipes,
+                    'levels':False
+                }
+            else:
+                for i in range(len(upperPipes)):
+                    upperPipes[i]['x'] += pipeVelXBase * dt
+                    lowerPipes[i]['x'] += pipeVelXBase * dt
+
+                    SCREEN.blit(IMAGES['pipe'][0],(upperPipes[i]['x'],upperPipes[i]['y']))
+                    SCREEN.blit(IMAGES['pipe'][1],(lowerPipes[i]['x'],lowerPipes[i]['y']))
+
+                if upperPipes[-1]['x'] <= SCREENWIDTH*0.6:
+                    newPipe = getRandomPipe()
+                    upperPipes.append(newPipe[0])
+                    lowerPipes.append(newPipe[1])
+
+                if len(upperPipes)>0 and upperPipes[0]['x'] < - pipe_width:
+                    upperPipes.pop(0)
+                    lowerPipes.pop(0)
+
+            
+            
+            
+            if balloons:
+                if balloons[0].getx() + balloons[0].w < 0:
+                    balloons.pop(0)
+
+            
+            for b in balloons:
+                b.update(dt, BALLOONS)
+                b.draw(SCREEN)
+
+            for wb in water_balls:
+
+                wb.update(dt)
+                wb.draw(SCREEN)
+
+                if not wb.hit:
+                    for b in balloons:
+                        if not b.hit and wb.hits(b): 
+                            b.hit = True
+                            wb.hit = True
+                            if b.color =='b':
+                                if score >0:
+                                    score -=1
+                                    score_streak = 0
+                                    water_balls_count = 1
+                            else:
+                                score += 1
+                                score_streak += 1
+                                if score_streak %5 == 0:
+                                    water_balls_count += 1
+            if water_balls and water_balls[-1].getx()>SCREENWIDTH:
+                water_balls.pop(-1)
+
+            
+            if GAME_DIFFICULTY["arcade"] and time.time() - start_time > 3:
+                pipeVelXBase  -= 0.01
+
+                if PIPEGAPSIZE > player_width * 2.5:
+                    PIPEGAPSIZE -= 1
+                descentSpeed += 0.001
+                playerAccY += 0.001
+                
+                starVelXBase  -= 0.01
+                if ballon_spawn_time >0.5:
+                    ballon_spawn_time -= 0.2
+                BALLOONS += 0.01
+                #if spaceConst 
+                spaceConst += 0.01
+                smileConst += 0.01
+                altitudeConst += 0.01
+                start_time = time.time()
+                
+            if time.time() - start_time> ballon_spawn_time:
+                index = random.randint(0,len(words)-1)
+                balloons.append(Balloon(words[index][1],words[index][0],SCREENWIDTH,SCREENHEIGHT,BALLOONW,BALLOONH))
+                start_time = time.time()
+        
+        
         showScore(score)
         
-
         if iterloop %5 == 0:
             playerIndex = next(playerIndexGen)
             
         iterloop = (iterloop + 1) % 30      
         
-        if BASES_LIST[0]['x'] + IMAGES['base'].get_width()<=0:
+        if BASES_LIST[0]['x'] + base_width<=0:
             BASES_LIST.pop(0)
 
         if len(BASES_LIST)<3:
-            BASES_LIST.append({'x':BASES_LIST[-1]['x']+IMAGES['base'].get_width(),'y':SCREENHEIGHT*0.1})
+            BASES_LIST.append({'x':BASES_LIST[-1]['x']+base_width,'y':SCREENHEIGHT*0.1})
         for base in BASES_LIST:
             base['x'] += baseVelx * dt
             SCREEN.blit(IMAGES['base'],(base['x'],int(SCREENHEIGHT-IMAGES['base'].get_height())))
         
-        
-    
-
-        FPSCLOCK.tick(FPS)
+        if levels and time.time() - levels_start_time>60:
+            return {'levels':levels,
+                    'y':playery,
+                    'score':score}
         pygame.display.update()
     
-def showGameOverScreen(crashInfo):
+def showGameOverScreen(crashInfo,levels = False):
     global file_path,GAME_MODES,BASES_LIST,high_scores,gm,gt,gd,NEW_HIGH_SCORE,LANDMARKS,FX,input_text
     score = crashInfo['score']
     playerx = SCREENWIDTH * 0.2
     playery = crashInfo['y']
-    upperPipes = crashInfo['up']
-    lowerPipes = crashInfo['lp']
-
+    try:
+        upperPipes = crashInfo['up']
+        lowerPipes = crashInfo['lp']
+    except:
+        upperPipes = []
+        lowerPipes = []
     # play hit and die sounds
     if not NOSOUND:
         SOUNDS['hit'].play()
@@ -867,6 +1168,7 @@ def showGameOverScreen(crashInfo):
             frame = video_capture.frame
     processedScore = False
     while True:
+        dt = FPSCLOCK.tick(FPS)
         events = pygame.event.get()
         for event in events:
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == KEYDOWN and event.key == K_SPACE):
@@ -876,16 +1178,16 @@ def showGameOverScreen(crashInfo):
         if not landmark.configured:
             return
         # player y shift
-        if playery < SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][0].get_height():
-            playery += 7
+        if playery < SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][0].get_height() * 1.2:
+            playery += 0.1 * dt
 
         playerRot  = -75
         setBG(frame)
 
-
-        for uPipe, lPipe in zip(upperPipes, lowerPipes):
-            SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
-            SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
+        if upperPipes:
+            for uPipe, lPipe in zip(upperPipes, lowerPipes):
+                SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
+                SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
 
         playerSurface = pygame.transform.rotate(IMAGES['player'][1], playerRot)
         SCREEN.blit(playerSurface, (playerx,playery))
@@ -894,9 +1196,8 @@ def showGameOverScreen(crashInfo):
         for base in BASES_LIST:
             SCREEN.blit(IMAGES['base'],(base['x'],int(SCREENHEIGHT-IMAGES['base'].get_height())))
         
-        processedScore =  showLeaderBoard(score,processedScore)
+        processedScore =  showLeaderBoard(score,processedScore,levels)
         write_high_scores()
-        FPSCLOCK.tick(FPS)
         pygame.display.update()
 
 def getNewStar():
@@ -926,7 +1227,7 @@ def getRandomPipe():
 def setBG(frame, f = False):
     if frame is not None:
         bg = cv.resize(frame,(SCREENWIDTH,SCREENHEIGHT))
-        bg = cv.flip(bg,1)
+        #bg = cv.flip(bg,1)
         bg = cv.cvtColor(bg,cv.COLOR_BGR2RGB)
         
         #bg = pygame.image.frombuffer(bg.tostring(), bg.shape[1::-1], "BGR")
@@ -946,19 +1247,24 @@ def showScore(score,gameOver = False):
         for digit in scoreDigits:
             SCREEN.blit(IMAGES['numbers'][digit], (Xoffset, SCREENHEIGHT * 0.1))
             Xoffset += IMAGES['numbers'][digit].get_width()
-def showLeaderBoard(score,processedScore):
+            
+def showLeaderBoard(score,processedScore,levels = False):
+    
     global gt,gd,gm, font,high_scores,input_text,GOLD_COLOR,BRONZ_COLOR,SILVER_COLOR
 
     text_offset = 30
     text_start_height = 0.1
-    if gt == 'stars' or gt == 'balloons':
+    if levels:gt = 'levels'
+    if gt == 'stars' or gt == 'balloons' or gt == 'banners' or gt == 'levels':
 
         first_n = high_scores[gt][gm]['1st']["name"]
         second_n =  high_scores[gt][gm]['2nd']["name"]
         third_n =  high_scores[gt][gm]['3rd']["name"]
+        
         first_s = high_scores[gt][gm]['1st']["s"]
         second_s =  high_scores[gt][gm]['2nd']["s"]
         third_s =  high_scores[gt][gm]['3rd']["s"]
+        
         try: 
             first_a = high_scores[gt][gm]['1st']["avatar"]
         except: first_a = None
@@ -968,6 +1274,7 @@ def showLeaderBoard(score,processedScore):
         try:
             third_a =  high_scores[gt][gm]['3rd']["avatar"]
         except: third_a = None
+        
         if not processedScore:
             if score > first_s: 
                 
@@ -1010,7 +1317,8 @@ def showLeaderBoard(score,processedScore):
                 third_s = score
                 third_a = avatars[current_avatar]
             processedScore = True
-    elif gt == 'pipes' or gt == 'pisa':
+    
+    elif gt == 'pipes' or gt == 'pisa' or gt=='pisabal':
 
         first_n = high_scores[gt][gm][gd]['1st']["name"]
         second_n =  high_scores[gt][gm][gd]['2nd']["name"]
@@ -1180,29 +1488,31 @@ def newHighScore(score,events):
     SCREEN.blit(input_text_surface, (prev_n_x,prev_n_y  ))
 
 def checkCollision(stars,playerMidPos):
+   global big_star_w,big_star_h,star_w,star_h
+   
    for j,i in enumerate(stars):
       
       if i['b']:
          
          x0 = i['x']
-         x1 = i['x'] + IMAGES['star_big'].get_width()
+         x1 = i['x'] + big_star_w
          y0 = i['y']
-         y1 = i['y'] + IMAGES['star_big'].get_height()
+         y1 = i['y'] + big_star_h
          
          if playerMidPos[0]<x1 and playerMidPos[0]>x0 and playerMidPos[1]<y1 and playerMidPos[1]>y0:
             return -j-1
       else:
          x0 = i['x']
-         x1 = i['x'] + IMAGES['star'].get_width()
+         x1 = i['x'] + star_w
          y0 = i['y']
-         y1 = i['y'] + IMAGES['star'].get_height()
+         y1 = i['y'] + star_h
          
          if playerMidPos[0]<x1 and playerMidPos[0]>x0 and playerMidPos[1]<y1 and playerMidPos[1]>y0:
             return j
    return -100
 
 def checkCrash(playerMidPos, upperPipes, lowerPipes):
-    if playerMidPos[1] + IMAGES['player'][0].get_height()//3 >= SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][0].get_height():
+    if playerMidPos[1] + IMAGES['player'][0].get_height() >= SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][0].get_height():
         return True
     
     for i in range(len(upperPipes)):
@@ -1303,26 +1613,35 @@ def removeOutliers(data):
 def configureSmile():
     global landmark,video_capture,landmark_list, HOPPED,min_smile,max_smile,FPS
 
-    dt = FPSCLOCK.tick(FPS)/1000
+    dt = FPSCLOCK.tick(FPS)
     playerIndex = 0
     playery = int(SCREENHEIGHT*0.5)
     playerIndexGen = cycle([0, 1, 2, 1])
     iterloop = 0
-    baseVelx = -128
-    playerVelY    =  0  
-    playerAccY = 12
-    playerMinAcc = -9
-    maxAngle = 60
-    minAngle = 0
-    descentSpeed = 0.65
-    max_acc = 15
-    min_acc = 10
+    
+    baseVelx = -0.25 #128
+    
+    
+    playerVelY = 0 
+    playerAccY = 0.5
+    playerMinAcc = -0.5
+    maxAngle = 40
+    minAngle = -15
+    descentSpeed = 0.03
+    max_acc = 0.6
+    min_acc = 0.01
+
+    smileConst = 1
+
+    
     landmark_list = []
     smileConst = 1
 
     
     temp = True
     while temp:
+        
+        dt = FPSCLOCK.tick(FPS)
 
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -1335,7 +1654,7 @@ def configureSmile():
         if not HOPPED:
             if landmark.smile_level > -1 * (min_smile*1.2)//1 * -1:
                 mag = (landmark.smile_level - min_smile) * (max_acc - min_acc) / (max_smile - min_smile)  + min_acc
-                if mag > max_acc or landmark.smile_level>=max_smile*0.75 : mag = max_acc
+                if mag > max_acc or landmark.smile_level>=max_smile*0.8 : mag = max_acc
                 if mag < min_acc: mag = min_acc
                 playerVelY = mag * smileConst
                 if not NOSOUND: SOUNDS['wing'].play()
@@ -1346,12 +1665,12 @@ def configureSmile():
 
         if playerVelY >= 0:
             if playery > IMAGES['player'][playerIndex].get_height()/2:
-                playery -= playerVelY
+                playery -= playerVelY * dt
             else: playerVelY = 0
         if playerVelY<0:
-            if playery < SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][playerIndex].get_height():
-                playery -= playerVelY
-        if playerVelY > -9:
+            if playery < SCREENHEIGHT - IMAGES['base'].get_height() - IMAGES['player'][playerIndex].get_height() *1.5 :
+                playery -= playerVelY * dt
+        if playerVelY > playerMinAcc:
             playerVelY -= descentSpeed
         
         rotation = (playerVelY - playerMinAcc) * (maxAngle - minAngle) / (playerAccY -playerMinAcc)  +minAngle
@@ -1378,7 +1697,7 @@ def configureSmile():
         if len(BASES_LIST)<3:
             BASES_LIST.append({'x':BASES_LIST[-1]['x']+IMAGES['base'].get_width(),'y':SCREENHEIGHT*0.1})
         for base in BASES_LIST:
-            base['x'] += baseVelx * dt
+            base['x'] += baseVelx
             SCREEN.blit(IMAGES['base'],(base['x'],int(SCREENHEIGHT-IMAGES['base'].get_height())))
 
 
@@ -1404,7 +1723,7 @@ def configureSmile():
         
             
         
-        FPSCLOCK.tick(FPS)
+        
         pygame.display.update()
     
     landmark.configured = True
@@ -1462,7 +1781,6 @@ def setName():
 
         if cameraOn:
             bg = cv.resize(video_capture.frame,(256,256))
-            bg = cv.flip(bg,1)
             bg = cv.cvtColor(bg,cv.COLOR_BGR2RGB)
             #bg = pygame.image.frombuffer(bg.tostring(), bg.shape[1::-1], "BGR")
             bg = pygame.surfarray.make_surface(bg)
@@ -1487,6 +1805,7 @@ def setName():
 
     
     nameSet = True
+
 def save_last_player(player_name, avatar_file):
     with open('last_player.txt', 'w') as f:
         # write the player's name and avatar file to the text file
@@ -1499,6 +1818,73 @@ def get_last_player():
         avatar = f.readline().strip()
 
     return player,avatar        
+
+def update_dict(dict,key):
+        for k in dict.keys():
+            if k == key:
+                dict[k] = True
+            else:
+                dict[k] = False
+                
+                
+def next_level(level):
+    global video_capture,font,font2
+    temp = True
+    cameraOn = False
     
+    while temp:
+
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and (event.key == K_ESCAPE)):
+                return False
+            elif event.type == KEYDOWN and event.key == K_RETURN:
+                return True
+
+        setBG(video_capture.frame)
+
+
+        if level == 'pipes':
+            text1 = "Welcome!"
+            text2 = "This is the first level of the game."
+            text3 = "Try to avoid the pipes by smiling!"
+        elif level == 'stars':
+            text1 = "Cool!"
+            text2 = "You have reached the stars stage."
+            text3 = "Now try to collect stars by smiling!"
+        elif level == 'balloons':
+            print('here')
+            text1 = "Awesome!"
+            text2= "You have reached the balloons stage."
+            text3 = "Shoot the red balloons by similing. Move the birdy up and down with arrow keys!"
+        elif level == 'pisa':
+            text1 = 'Great!'
+            text2 = "You have reached the Pipes and Stars stage."
+            text3 = "Try to avoid pipes and collect stars by smiling!"
+        elif level == 'pisabal':
+            text1 = 'G-R-E-A-T!!!!'
+            text2 = "You have reached the final level!"
+            text3 = "Avoid pipes and collect stars with SPACE key and shoot the red balloons by smiling!"
+        elif level =='finished':
+            text1 = 'Congratulations!'
+            text2 = "You have finished the game!"
+            text3 = "Dont forget to come and play again!"
+            
+        text_surface1 = font2.render(text1,True,(0,255,0))
+        text_surface2 = font2.render(text2,True,(0,255,0))
+        text_surface3 = font2.render(text3,True,(0,255,0))
+        SCREEN.blit(text_surface1,(SCREENWIDTH//2-text_surface1.get_width()//2,SCREENHEIGHT * 0.2 ))
+        SCREEN.blit(text_surface2,(SCREENWIDTH//2-text_surface2.get_width()//2,SCREENHEIGHT * 0.2 + text_surface1.get_height() + 10 ))
+        SCREEN.blit(text_surface3,(SCREENWIDTH//2-text_surface3.get_width()//2,SCREENHEIGHT * 0.2 + text_surface1.get_height() + text_surface2.get_height() + 20 ))
+        
+        enter_text = font2.render('Press Enter to continue', True, (0, 255, 0))
+        SCREEN.blit(enter_text,(SCREENWIDTH//2-enter_text.get_width()//2,SCREENHEIGHT * 0.2 + text_surface1.get_height() + text_surface2.get_height() + text_surface3.get_height() + 60 ))
+        
+        SCREEN.blit(IMAGES['base'],(0,int(SCREENHEIGHT-IMAGES['base'].get_height())))
+        FPSCLOCK.tick(FPS)
+        pygame.display.update()
+
+
+                    
+
 if __name__ == '__main__':
     main()

@@ -18,7 +18,7 @@ class videocapture:
 
         self.prev_frame_time = 0
         self.new_frame_time = 0
-        self.showFps = True
+        self.showFps = False
 
     def start(self):
         Thread(target=self.get,args=()).start()
@@ -32,7 +32,7 @@ class videocapture:
 
             else:                    
                 self.ret,self.frame = self.video.read()
-                
+                #self.frame = cv2.flip(self.frame,1)
                 self.new_frame_time =time.time()
                 fps = 1/(self.new_frame_time-self.prev_frame_time)
                 self.prev_frame_time = self.new_frame_time
@@ -41,6 +41,7 @@ class videocapture:
                 if self.showFps:
                     self.frame = cv2.putText(self.frame, fps, (10, 25),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                
                 time.sleep(self.frame_rate)
                 
 

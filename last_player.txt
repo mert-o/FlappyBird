@@ -1,2 +1,2 @@
-
-./assets/avatars/135131.jpg
+A
+assets\avatars\3.png
