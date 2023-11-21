@@ -114,16 +114,17 @@ class Banners:
         self.sw = sw
         self.sh = sh
         if good:
-            self.protected = True
+            self.protected = False
         else:
             self.protected = False
         self.good = good
         self.path, self.name = os.path.split(path)
 
-        if good:
+        """ if good:
             self.banner = pygame.transform.scale(pygame.image.load(os.path.join(self.path,'protected',self.name)),(w,h))
         else:
-             self.banner = pygame.transform.scale(pygame.image.load(os.path.join(self.path,self.name)),(w,h))
+              """
+        self.banner = pygame.transform.scale(pygame.image.load(os.path.join(self.path,self.name)),(w,h))
 
         self.rect = self.banner.get_rect()
         self.rect.x = self.sw + w
