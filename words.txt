@@ -1,0 +1,4 @@
+[r]badword
+[b]goodword
+[r]bad
+[b]good
