@@ -1,2 +1,1 @@
-Player
-./assets/avatars\1.png
+
