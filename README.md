@@ -2,7 +2,7 @@
 
 A flappy bird variant where the player smiles for jumps.
 
-### Setup (Tested on MacOS/Ubuntu/Windows 10)
+### Setup (Tested on MacOS/Ubuntu 22.04/Windows 10)
 
 - git clone https://github.com/mert-o/flappybird.git  
 - cd flappybird 
